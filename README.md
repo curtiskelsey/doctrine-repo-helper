@@ -1,7 +1,6 @@
 # Doctrine Repo Helper
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/curtiskelsey/doctrine-repo-helper/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/curtiskelsey/doctrine-repo-helper/?branch=master)
-
 [![Code Coverage](https://scrutinizer-ci.com/g/curtiskelsey/doctrine-repo-helper/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/curtiskelsey/doctrine-repo-helper/?branch=master)
 
 This package was created for developers using the `doctrine/doctrine-orm-module`

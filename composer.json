@@ -6,14 +6,16 @@
     "keywords": [
         "doctrine",
         "repository",
-        "helper"
+        "helper",
+        "extension",
+        "cli"
     ],
     "homepage": "https://github.com/curtiskelsey/doctrine-repo-helper",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
         "php": "^7.0",
-        "doctrine/doctrine-orm-module": "^2.0",
+        "doctrine/doctrine-orm-module": "^1.0 || ^2.0",
         "zendframework/zend-code": "^3.3"
     },
     "require-dev": {

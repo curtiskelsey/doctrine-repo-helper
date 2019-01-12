@@ -16,7 +16,7 @@
     "require": {
         "php": "^7.0",
         "doctrine/doctrine-orm-module": "^1.0 || ^2.0",
-        "zendframework/zend-code": "^3.3"
+        "zendframework/zend-code": "^2.0 || ^3.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",

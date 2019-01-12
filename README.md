@@ -1,5 +1,6 @@
 # Doctrine Repo Helper
 
+[![Build Status](https://travis-ci.com/curtiskelsey/doctrine-repo-helper.svg?branch=master)](https://travis-ci.com/curtiskelsey/doctrine-repo-helper)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/curtiskelsey/doctrine-repo-helper/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/curtiskelsey/doctrine-repo-helper/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/curtiskelsey/doctrine-repo-helper/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/curtiskelsey/doctrine-repo-helper/?branch=master)
 

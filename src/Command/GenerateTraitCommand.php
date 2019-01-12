@@ -88,23 +88,24 @@ EOT
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $traitName = $input->getOption('classname');
+        /** @var string $traitName */
+        $traitName = (string)$input->getOption('classname');
+
+        /** @var string $destination */
+        $destination = (string)$input->getOption('destination');
+
         $outputFileName = sprintf(
             '%s/%s.php',
-            $input->getOption('destination'),
+            $destination,
             $traitName
         );
 
         $metaDataEntries = $this->entityManager->getMetadataFactory()->getAllMetadata();
-        $trait = $this->generateTrait(
-            $input,
-            $output
-        );
+        $trait = $this->generateTrait($input);
 
         foreach ($metaDataEntries as $metaData) {
             $method = $this->generateMethod(
                 $input,
-                $output,
                 $metaData
             );
 
@@ -163,14 +164,16 @@ EOT
 
     /**
      * @param InputInterface $input
-     * @param OutputInterface $output
      * @return TraitGenerator
      */
-    private function generateTrait(InputInterface $input, OutputInterface $output): TraitGenerator
+    private function generateTrait(InputInterface $input): TraitGenerator
     {
-        $entityManagerGetter = $input->getOption('em-getter');
-        $traitName = $input->getOption('classname');
-        $traitNameSpace = $input->getOption('namespace');
+        /** @var string $entityManagerGetter */
+        $entityManagerGetter = (string)$input->getOption('em-getter');
+        /** @var string $traitName */
+        $traitName = (string)$input->getOption('classname');
+        /** @var string $traitNameSpace */
+        $traitNameSpace = (string)$input->getOption('namespace');
 
         $trait = new TraitGenerator(
             $traitName,
@@ -208,11 +211,10 @@ EOT
     /**
      * @param ClassMetadata $metaData
      * @param InputInterface $input
-     * @param OutputInterface $output
      * @return MethodGenerator
      * @throws \ReflectionException
      */
-    private function generateMethod(InputInterface $input, OutputInterface $output, ClassMetadata $metaData): MethodGenerator
+    private function generateMethod(InputInterface $input, ClassMetadata $metaData): MethodGenerator
     {
         $entityManagerGetter = $input->getOption('em-getter');
 

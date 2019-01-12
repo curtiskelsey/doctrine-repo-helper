@@ -9,6 +9,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Zend\Code\Generator\DocBlockGenerator;
+use Zend\Code\Generator\Exception\InvalidArgumentException;
+use Zend\Code\Generator\FileGenerator;
 use Zend\Code\Generator\MethodGenerator;
 
 /**
@@ -123,14 +125,11 @@ EOT
             $reflection = new \ReflectionClass($fqcn);
             $repoReflection = null;
 
-            $trait->addUse($fqcn);
-
             if ($metaData->customRepositoryClassName) {
-                $trait->addUse($metaData->customRepositoryClassName);
                 $repoReflection = new \ReflectionClass($metaData->customRepositoryClassName);
             }
 
-            $method = new \Zend\Code\Generator\MethodGenerator(
+            $method = new MethodGenerator(
                 sprintf(
                     'get%sRepository',
                     $reflection->getShortName()
@@ -138,9 +137,9 @@ EOT
                 [],
                 MethodGenerator::FLAG_PUBLIC,
                 sprintf(
-                    'return $this->%s->getRepository(%s::class);',
+                    'return $this->%s->getRepository(\\%s::class);',
                     $entityManagerGetter,
-                    $reflection->getShortName()
+                    $reflection->getName()
                 )
             );
 
@@ -154,7 +153,7 @@ EOT
                             'description' => sprintf(
                                 '%s%s',
                                 'EntityRepository',
-                                $repoReflection ? '|' . $repoReflection->getShortName() : ''
+                                $repoReflection ? '|\\' . $repoReflection->getName() : ''
                             )
                         ]
                     ]
@@ -163,10 +162,37 @@ EOT
 
             $method->setDocBlock($docBlock);
 
-            $trait->addMethodFromGenerator($method);
+            try {
+                $trait->addMethodFromGenerator($method);
+
+            } catch (InvalidArgumentException $e) {
+                $output->writeln(
+                    sprintf(
+                        'Method "%s" already exists in this class',
+                        $method->getName()
+                    )
+                );
+
+                $method->setName(
+                    sprintf(
+                        'get%sRepository%s',
+                        $reflection->getShortName(),
+                        str_replace('.', '', uniqid('', true))
+                    )
+                );
+
+                $trait->addMethodFromGenerator($method);
+                $output->writeln(
+                    sprintf(
+                        'Refactored the method to "%s". Please refactor to a usable name you will remember',
+                        $method->getName()
+                    )
+                );
+                $output->writeln('');
+            }
         }
 
-        $file = new \Zend\Code\Generator\FileGenerator();
+        $file = new FileGenerator();
         $file->setClass($trait);
 
         file_put_contents($outputFileName, $file->generate());

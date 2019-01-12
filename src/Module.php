@@ -3,6 +3,7 @@
 namespace DoctrineRepoHelper;
 
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
 use DoctrineRepoHelper\Command\GenerateTraitCommand;
 use Symfony\Component\Console\Application;
 use Zend\EventManager\EventInterface;
@@ -29,7 +30,12 @@ class Module
             function (EventInterface $e) {
                 /* @var $cli Application */
                 $cli = $e->getTarget();
-                $em = $cli->getHelperSet()->get('em')->getEntityManager();
+
+                /** @var EntityManagerHelper $emHelper */
+                $emHelper = $cli->getHelperSet()->get('em');
+
+                $em = $emHelper->getEntityManager();
+
                 ConsoleRunner::addCommands($cli);
 
                 $cli->addCommands([new GenerateTraitCommand($em)]);

@@ -31,10 +31,14 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "DoctrineRepoHelperTest\\": "test/"
+            "DoctrineRepoHelperTest\\": "tests/"
         }
     },
     "scripts": {
+        "check": [
+            "@cs-check",
+            "@test"
+        ],
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",
         "development-disable": "zf-development-mode disable",
@@ -43,6 +47,7 @@
         "post-create-project-cmd": [
             "@development-enable"
         ],
-        "test": "phpunit"
+        "test": "phpunit --colors=always",
+        "test-coverage": "phpunit --coverage-clover build/clover.xml"
     }
 }

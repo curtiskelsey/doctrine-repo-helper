@@ -46,10 +46,8 @@ class GenerateTraitCommand extends Command
             ->setName('orm:generate-repository-trait')
             ->setDescription('Generate a repository helper trait')
             ->setHelp(
-                <<<EOT
-The generate repository trait command creates a trait that will allow your development environment to autocomplete
-custom repository methods
-EOT
+                'The generate repository trait command creates a trait that will allow your development 
+                environment to autocomplete custom repository methods'
             )
             ->addOption(
                 'namespace',
@@ -111,7 +109,6 @@ EOT
 
             try {
                 $trait->addMethodFromGenerator($method);
-
             } catch (InvalidArgumentException $e) {
                 $output->writeln(
                     sprintf(
@@ -187,7 +184,8 @@ EOT
         $docBlock = DocBlockGenerator::fromArray(
             [
                 'shortDescription' => $traitName,
-                'longDescription' => 'Provides helper methods for accessing custom repositories. Provides type hints to allow for custom method auto-completion within IDEs',
+                'longDescription' => 'Provides helper methods for accessing custom repositories. In addition, provides 
+                    type hints to allow for custom method auto-completion within IDEs',
                 'tags' => [
                     [
                         'name' => 'package',

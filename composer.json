@@ -1,0 +1,46 @@
+{
+    "name": "curtiskelsey/doctrine-repo-helper",
+    "description": "Generates a trait to help ease the access of custom repo methods",
+    "type": "library",
+    "license": "mit",
+    "keywords": [
+        "doctrine",
+        "repository",
+        "helper"
+    ],
+    "homepage": "https://github.com/curtiskelsey/doctrine-repo-helper",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require": {
+        "php": "^7.0",
+        "zendframework/zend-code": "^3.3"
+    },
+    "require-dev": {
+        "doctrine/doctrine-orm-module": "^2.0",
+        "roave/security-advisories": "dev-master",
+        "zendframework/zend-mvc": "^3.0.1",
+        "zendframework/zend-mvc-console": "^1.1.10",
+        "zfcampus/zf-development-mode": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "DoctrineRepoHelper\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DoctrineRepoHelperTest\\": "test/"
+        }
+    },
+    "scripts": {
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "development-disable": "zf-development-mode disable",
+        "development-enable": "zf-development-mode enable",
+        "development-status": "zf-development-mode status",
+        "post-create-project-cmd": [
+            "@development-enable"
+        ],
+        "test": "phpunit"
+    }
+}

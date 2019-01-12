@@ -1,0 +1,39 @@
+<?php
+/**
+ * Local Configuration Override for DEVELOPMENT MODE.
+ *
+ * This configuration override file is for providing configuration to use while
+ * in development mode. Run:
+ *
+ * <code>
+ * $ composer development-enable
+ * </code>
+ *
+ * from the project root to copy this file to development.local.php and enable
+ * the settings it contains.
+ *
+ * You may also create files matching the glob pattern `{,*.}{global,local}-development.php`.
+ */
+
+return [
+    'view_manager' => [
+        'display_exceptions' => true,
+    ],
+    'doctrine' => [
+        'driver' => [
+            // defines an annotation driver with two paths, and names it `my_annotation_driver`
+            'my_annotation_test_driver' => [
+                'class' => \Doctrine\ORM\Mapping\Driver\AnnotationDriver::class,
+                'cache' => 'array',
+                'paths' => [
+                    __DIR__ . '/../../test/Entity/'
+                ],
+            ],
+            'orm_default' => [
+                'drivers' => [
+                     'DoctrineRepoHelperTest\\Entity' => 'my_annotation_test_driver',
+                ],
+            ],
+        ],
+    ],
+];

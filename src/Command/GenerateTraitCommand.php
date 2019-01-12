@@ -1,7 +1,11 @@
 <?php
+/**
+ * @noinspection PhpUndefinedFieldInspection
+ */
 
 namespace DoctrineRepoHelper\Command;
 
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Console\Command\Command;
@@ -12,6 +16,7 @@ use Zend\Code\Generator\DocBlockGenerator;
 use Zend\Code\Generator\Exception\InvalidArgumentException;
 use Zend\Code\Generator\FileGenerator;
 use Zend\Code\Generator\MethodGenerator;
+use Zend\Code\Generator\TraitGenerator;
 
 /**
  * Class GenerateTraitCommand
@@ -22,6 +27,10 @@ class GenerateTraitCommand extends Command
     /** @var EntityManager */
     protected $entityManager;
 
+    /**
+     * GenerateTraitCommand constructor.
+     * @param EntityManager $entityManager
+     */
     public function __construct(EntityManager $entityManager)
     {
         $this->entityManager = $entityManager;
@@ -78,18 +87,91 @@ EOT
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $entityManagerGetter = $input->getOption('em-getter');
         $traitName = $input->getOption('classname');
-        $traitNameSpace = $input->getOption('namespace');
         $outputFileName = sprintf(
             '%s/%s.php',
             $input->getOption('destination'),
             $traitName
         );
 
-        $metaDatas = $this->entityManager->getMetadataFactory()->getAllMetadata();
+        $metaDataEntries = $this->entityManager->getMetadataFactory()->getAllMetadata();
+        $trait = $this->generateTrait(
+            $input,
+            $output
+        );
 
-        $trait = new \Zend\Code\Generator\TraitGenerator(
+        foreach ($metaDataEntries as $metaData) {
+            $method = $this->generateMethod(
+                $input,
+                $output,
+                $metaData
+            );
+
+            try {
+                $trait->addMethodFromGenerator($method);
+
+            } catch (InvalidArgumentException $e) {
+                $output->writeln(
+                    sprintf(
+                        'Method "%s" already exists in this class',
+                        $method->getName()
+                    )
+                );
+
+                $reflection = new \ReflectionClass($metaData->getName());
+
+                $method->setName(
+                    sprintf(
+                        'get%sRepository%s',
+                        $reflection->getShortName(),
+                        str_replace('.', '', uniqid('', true))
+                    )
+                );
+
+                $trait->addMethodFromGenerator($method);
+
+                $output->writeln(
+                    sprintf(
+                        'Refactored the method to "%s". Please refactor to a usable name you will remember',
+                        $method->getName()
+                    )
+                );
+                $output->writeln('');
+            }
+        }
+
+        $file = new FileGenerator();
+        $file->setClass($trait);
+
+        file_put_contents(
+            $outputFileName,
+            $file->generate()
+        );
+
+        $output->writeln('');
+
+        $output->writeln(
+            sprintf(
+                'Trait created in "%s"',
+                $outputFileName
+            )
+        );
+
+        $output->writeln('');
+    }
+
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return TraitGenerator
+     */
+    private function generateTrait(InputInterface $input, OutputInterface $output): TraitGenerator
+    {
+        $entityManagerGetter = $input->getOption('em-getter');
+        $traitName = $input->getOption('classname');
+        $traitNameSpace = $input->getOption('namespace');
+
+        $trait = new TraitGenerator(
             $traitName,
             $traitNameSpace
         );
@@ -119,93 +201,58 @@ EOT
         );
 
         $trait->setDocBlock($docBlock);
+        return $trait;
+    }
 
-        foreach ($metaDatas as $metaData) {
-            $fqcn = $metaData->getName();
-            $reflection = new \ReflectionClass($fqcn);
-            $repoReflection = null;
+    /**
+     * @param ClassMetadata $metaData
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return MethodGenerator
+     * @throws \ReflectionException
+     */
+    private function generateMethod(InputInterface $input, OutputInterface $output, ClassMetadata $metaData): MethodGenerator
+    {
+        $entityManagerGetter = $input->getOption('em-getter');
 
-            if ($metaData->customRepositoryClassName) {
-                $repoReflection = new \ReflectionClass($metaData->customRepositoryClassName);
-            }
+        $reflection = new \ReflectionClass($metaData->getName());
+        $repoReflection = null;
 
-            $method = new MethodGenerator(
-                sprintf(
-                    'get%sRepository',
-                    $reflection->getShortName()
-                ),
-                [],
-                MethodGenerator::FLAG_PUBLIC,
-                sprintf(
-                    'return $this->%s->getRepository(\\%s::class);',
-                    $entityManagerGetter,
-                    $reflection->getName()
-                )
-            );
-
-
-
-            $docBlock = DocBlockGenerator::fromArray(
-                [
-                    'tags' => [
-                        [
-                            'name' => 'return',
-                            'description' => sprintf(
-                                '%s%s',
-                                'EntityRepository',
-                                $repoReflection ? '|\\' . $repoReflection->getName() : ''
-                            )
-                        ]
-                    ]
-                ]
-            );
-
-            $method->setDocBlock($docBlock);
-
-            try {
-                $trait->addMethodFromGenerator($method);
-
-            } catch (InvalidArgumentException $e) {
-                $output->writeln(
-                    sprintf(
-                        'Method "%s" already exists in this class',
-                        $method->getName()
-                    )
-                );
-
-                $method->setName(
-                    sprintf(
-                        'get%sRepository%s',
-                        $reflection->getShortName(),
-                        str_replace('.', '', uniqid('', true))
-                    )
-                );
-
-                $trait->addMethodFromGenerator($method);
-                $output->writeln(
-                    sprintf(
-                        'Refactored the method to "%s". Please refactor to a usable name you will remember',
-                        $method->getName()
-                    )
-                );
-                $output->writeln('');
-            }
+        if ($metaData->customRepositoryClassName) {
+            $repoReflection = new \ReflectionClass($metaData->customRepositoryClassName);
         }
 
-        $file = new FileGenerator();
-        $file->setClass($trait);
-
-        file_put_contents($outputFileName, $file->generate());
-
-        $output->writeln('');
-
-        $output->writeln(
+        $method = new MethodGenerator(
             sprintf(
-                'Trait created in "%s"',
-                $outputFileName
+                'get%sRepository',
+                $reflection->getShortName()
+            ),
+            [],
+            MethodGenerator::FLAG_PUBLIC,
+            sprintf(
+                'return $this->%s->getRepository(\\%s::class);',
+                $entityManagerGetter,
+                $reflection->getName()
             )
         );
 
-        $output->writeln('');
+
+        $docBlock = DocBlockGenerator::fromArray(
+            [
+                'tags' => [
+                    [
+                        'name' => 'return',
+                        'description' => sprintf(
+                            '%s%s',
+                            'EntityRepository',
+                            $repoReflection ? '|\\' . $repoReflection->getName() : ''
+                        )
+                    ]
+                ]
+            ]
+        );
+
+        $method->setDocBlock($docBlock);
+        return $method;
     }
 }

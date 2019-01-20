@@ -57,3 +57,62 @@ then be sure to add
 ```
 
 to your Zend application's list of loaded modules.
+
+## Options
+
+Several options are provided to allow control over the trait created and what entities it serves:
+
+```
+php public/index.php orm:generate-repository-trait --help
+
+Description:
+  Generate a repository helper trait
+
+Usage:
+  orm:generate-repository-trait [options]
+
+Options:
+      --namespace[=NAMESPACE]  Declares the namespace
+  -o, --output[=OUTPUT]        Output path [default: "/var/www"]
+  -c, --className[=CLASSNAME]  Classname of the trait [default: "CustomRepositoryAwareTrait"]
+      --em-getter[=EM-GETTER]  Property or method name to access the EntityManager [default: "getObjectManager()"]
+  -f, --force                  Overwrite existing trait
+      --filter[=FILTER]        Filter the list of entities getters are created for
+  -h, --help                   Display this help message
+  -q, --quiet                  Do not output any message
+  -V, --version                Display this application version
+      --ansi                   Force ANSI output
+      --no-ansi                Disable ANSI output
+  -n, --no-interaction         Do not ask any interactive question
+  -v|vv|vvv, --verbose         Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+
+Help:
+  The generate repository trait command creates a trait that will allow your development
+                  environment to autocomplete custom repository methods
+```
+
+### Custom output directory
+```
+php public/index.php orm:generate-repository-trait -o My/Special/Path
+```
+
+### Custom trait class name and namespace
+```
+php public/index.php orm:generate-repository-trait -c SpecialName --namespace=Special\\Namespace
+```
+
+### Custom entity manager accessor
+```
+php public/index.php orm:generate-repository-trait --em-getter=getMyEntityManager()
+```
+
+### Overwrite existing trait file
+```
+php public/index.php orm:generate-repository-trait -f
+```
+
+### Filter the entity repositories used within the generated trait
+```
+php public/index.php orm:generate-repository-trait -filter=Cast
+# Only inserts repo getters for entities where "Cast" is found withing the FQCN string
+```

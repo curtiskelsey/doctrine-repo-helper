@@ -13,7 +13,7 @@ apt-get install -y php7.3-mbstring php7.3-opcache php7.3-soap php7.3-sqlite3 php
 apt-get install -y libapache2-mod-php7.3 php7.3-pdo php7.3-mysql mysql-server mysql-client
 
 mysql -e "CREATE DATABASE IF NOT EXISTS doctrine CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql -e "CREATE USER 'doctrine'@'%' IDENTIFIED BY '123';"
+mysql -e "CREATE USER If NOT EXISTS 'doctrine'@'%' IDENTIFIED BY '123';"
 mysql -e "GRANT ALL PRIVILEGES ON doctrine.* TO 'doctrine'@'%';"
 
 # Configure Apache
@@ -46,9 +46,8 @@ if ! grep -q "cd /var/www" /home/vagrant/.profile; then
     echo "cd /var/www" >> /home/vagrant/.profile
 fi
 
-echo "** [ZF] Run the following command to install dependencies, if you have not already:"
-echo "    vagrant ssh -c 'composer install'"
-echo "** [ZF] Visit http://localhost:8080 in your browser for to view the application **"
+cd /var/www
+composer install
 SCRIPT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|

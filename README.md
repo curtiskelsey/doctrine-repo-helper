@@ -123,6 +123,5 @@ php public/index.php orm:generate-repository-trait --filter=Cast
 * `git clone`
 * `vagrant up`
 * `vagrant ssh`
-* `composer install`
 * `php public/index.php orm:schema-tool:update -f`
 * `php public/index.php orm:generate-repository-trait`

@@ -113,6 +113,16 @@ php public/index.php orm:generate-repository-trait -f
 
 ### Filter the entity repositories used within the generated trait
 ```
-php public/index.php orm:generate-repository-trait -filter=Cast
+php public/index.php orm:generate-repository-trait --filter=Cast
 # Only inserts repo getters for entities where "Cast" is found withing the FQCN string
 ```
+
+## Development
+
+### Quickstart
+* `git clone`
+* `vagrant up`
+* `vagrant ssh`
+* `composer install`
+* `php public/index.php orm:schema-tool:update -f`
+* `php public/index.php orm:generate-repository-trait`

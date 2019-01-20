@@ -10,7 +10,13 @@
 [![Total Downloads](https://poser.pugx.org/curtiskelsey/doctrine-repo-helper/downloads)](https://packagist.org/packages/curtiskelsey/doctrine-repo-helper)
 
 This package was created for developers using the `doctrine/doctrine-orm-module`
-to provide a CLI command for generating custom repository getter methods.
+to provide a CLI command for generating custom repository getter methods. Adds:
+
+```
+php public/index.php orm:generate-repository-trait
+```
+
+to the `doctrine-orm-module cli`.
 
 ## Introduction
 

@@ -56,15 +56,15 @@ class GenerateTraitCommand extends Command
                 'Declares the namespace'
             )
             ->addOption(
-                'destination',
-                null,
+                'output',
+                'o',
                 InputOption::VALUE_OPTIONAL,
-                'Path to create the trait in',
+                'Output path',
                 getcwd()
             )
             ->addOption(
-                'classname',
-                null,
+                'className',
+                'c',
                 InputOption::VALUE_OPTIONAL,
                 'Classname of the trait',
                 'CustomRepositoryAwareTrait'
@@ -73,8 +73,20 @@ class GenerateTraitCommand extends Command
                 'em-getter',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Name of the property or method classes that use the trait will have to access the EntityManager',
+                'Property or method name to access the EntityManager',
                 'getObjectManager()'
+            )
+            ->addOption(
+                'force',
+                'f',
+                InputOption::VALUE_NONE,
+                'Overwrite existing trait'
+            )
+            ->addOption(
+                'filter',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Filter the list of entities getters are created for'
             );
     }
 
@@ -87,10 +99,10 @@ class GenerateTraitCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         /** @var string $traitName */
-        $traitName = (string)$input->getOption('classname');
+        $traitName = (string)$input->getOption('className');
 
         /** @var string $destination */
-        $destination = (string)$input->getOption('destination');
+        $destination = (string)$input->getOption('output');
 
         $outputFileName = sprintf(
             '%s/%s.php',
@@ -102,6 +114,12 @@ class GenerateTraitCommand extends Command
         $trait = $this->generateTrait($input);
 
         foreach ($metaDataEntries as $metaData) {
+            if ($filter = $input->getOption('filter')) {
+                if (strpos($metaData->getName(), $filter) === false) {
+                    continue;
+                }
+            }
+
             $method = $this->generateMethod(
                 $input,
                 $metaData
@@ -142,6 +160,17 @@ class GenerateTraitCommand extends Command
         $file = new FileGenerator();
         $file->setClass($trait);
 
+        if (!is_dir($destination)) {
+            mkdir($destination, 0777, true);
+        }
+
+        if (!$input->getOption('force')) {
+            if (file_exists($outputFileName)) {
+                $output->writeln('File already exists. Use "-f" to force overwriting the existing file');
+                return;
+            }
+        }
+
         file_put_contents(
             $outputFileName,
             $file->generate()
@@ -168,7 +197,7 @@ class GenerateTraitCommand extends Command
         /** @var string $entityManagerGetter */
         $entityManagerGetter = (string)$input->getOption('em-getter');
         /** @var string $traitName */
-        $traitName = (string)$input->getOption('classname');
+        $traitName = (string)$input->getOption('className');
         /** @var string $traitNameSpace */
         $traitNameSpace = (string)$input->getOption('namespace');
 

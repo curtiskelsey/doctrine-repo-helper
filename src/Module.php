@@ -4,6 +4,7 @@ namespace DoctrineRepoHelper;
 
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
 use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
+use DoctrineRepoHelper\Command\GenerateDataFactoryCommand;
 use DoctrineRepoHelper\Command\GenerateTraitCommand;
 use Symfony\Component\Console\Application;
 use Zend\EventManager\EventInterface;
@@ -39,6 +40,7 @@ class Module
                 ConsoleRunner::addCommands($cli);
 
                 $cli->addCommands([new GenerateTraitCommand($em)]);
+                $cli->addCommands([new GenerateDataFactoryCommand($em)]);
             }
         );
     }

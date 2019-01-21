@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+#
+# Set the HOSTIP to your local computer's IP address for CLI debugging from vagrant. Any IP on your host you can ping
+# from the Vagrant VM should work
+#
+source config/environment
+
+export XDEBUG_CONFIG="default_enable=1 remote_enable=1 remote_handler=dbgp remote_port=9000 remote_host=$HOSTIP remote_autostart=0 remote_connect_back=0" &&
+export PHP_IDE_CONFIG="serverName=vagrant" &&
+php public/index.php "${@}"
+
+exit;

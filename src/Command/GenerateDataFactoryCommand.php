@@ -99,16 +99,7 @@ class GenerateDataFactoryCommand extends Command
                             ]
                         ]
                     ),
-                    'body' => sprintf(
-                        'use League\\FactoryMuffin\\Faker\\Facade as Faker;
-
-$factory->_define(
-    %s::class,
-    %s
-);',
-                        $metaData->getName(),
-                        $this->buildFactoryData($metaData)->generate()
-                    ),
+                    'body' => $this->buildBody($metaData),
                 ]
             );
 
@@ -125,19 +116,77 @@ $factory->_define(
 
     /**
      * @param ClassMetadata $metaData
-     * @return ValueGenerator
+     * @return string[]
      */
-    private function buildFactoryData(ClassMetadata $metaData)
+    private function buildFactoryData(ClassMetadata $metaData): array
     {
         $data = [];
 
         foreach ($metaData->fieldMappings as $fieldMapping) {
             switch ($fieldMapping['type']) {
-                // TODO handle all primitive types
+                case 'smallint':
+                case 'integer':
+                case 'bigint':
+                    $data[] = sprintf(
+                        "        '%s' => random_int(0, 65000),\n",
+                        $fieldMapping['fieldName']
+                    );
+                    break;
+                case 'decimal':
+                case 'float':
+                    $data[] = sprintf(
+                        "        '%s' => Faker::randomFloat(2),\n",
+                        $fieldMapping['fieldName']
+                    );
+                    break;
+                case 'string':
+                    $data[] = sprintf(
+                        "        '%s' => Faker::sentence(),\n",
+                        $fieldMapping['fieldName']
+                    );
+                    break;
+                case 'text':
+                    $data[] = sprintf(
+                        "        '%s' => Faker::paragraph(),\n",
+                        $fieldMapping['fieldName']
+                    );
+                    break;
+                case 'guid':
+                    // TODO
+                case 'binary':
+                case 'blob':
+                    break;
+                case 'boolean':
+                    $data[] = sprintf(
+                        "        '%s' => (bool)random_int(0, 1),\n",
+                        $fieldMapping['fieldName']
+                    );
+                    break;
                 case 'date':
+                case 'date_immutable':
+                case 'datetime':
+                case 'datetime_immutable':
+                case 'datetimetz':
+                case 'datetimetz_immutable':
+                case 'time':
+                case 'time_immutable':
+                    $data[] = sprintf(
+                        "        '%s' => Faker::dateTime(),\n",
+                        $fieldMapping['fieldName']
+                    );
+                    break;
+                case 'dateinterval':
+                case 'array':
+                case 'simple_array':
+                case 'json':
+                case 'json_array':
+                case 'object':
                     break;
                 default:
-                    $data[$fieldMapping['fieldName']] = 'Faker::word()';
+                    $data[] = sprintf(
+                        "        '%s' => Faker::word(),\n",
+                        $fieldMapping['fieldName']
+                    );
                     break;
             }
         }
@@ -145,7 +194,11 @@ $factory->_define(
         foreach ($metaData->associationMappings as $associationMapping) {
             switch ($associationMapping['type']) {
                 case 1:
-                    // TODO entity|FQCN::class
+                    $data[] = sprintf(
+                        "        '%s' => 'entity|' . \\%s::class",
+                        $associationMapping['fieldName'],
+                        $associationMapping['targetEntity']
+                    );
                     break;
                 case 2:
                     // TODO many to one?
@@ -155,6 +208,33 @@ $factory->_define(
             }
         }
 
-        return new ValueGenerator($data);
+        return $data;
+    }
+
+    /**
+     * @param ClassMetadata $metaData
+     * @return string
+     */
+    private function buildBody(ClassMetadata $metaData): string
+    {
+        $fields = $this->buildFactoryData($metaData);
+
+        $body = sprintf(
+            "use League\\FactoryMuffin\\Faker\\Facade as Faker;
+
+\$factory->_define(
+    %s::class,
+    [\n",
+            $metaData->getName()
+        );
+
+        foreach ($fields as $field) {
+            $body .= $field;
+        }
+
+        $body .= '
+    ]
+);';
+        return $body;
     }
 }

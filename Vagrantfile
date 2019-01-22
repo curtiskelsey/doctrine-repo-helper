@@ -10,7 +10,7 @@ add-apt-repository ppa:ondrej/php
 apt-get update
 apt-get install -y apache2 git curl php7.3 php7.3-bcmath php7.3-bz2 php7.3-cli php7.3-curl php7.3-intl php7.3-json
 apt-get install -y php7.3-mbstring php7.3-opcache php7.3-soap php7.3-sqlite3 php7.3-xml php7.3-xsl php7.3-zip
-apt-get install -y libapache2-mod-php7.3 php7.3-pdo php7.3-mysql mysql-server mysql-client
+apt-get install -y libapache2-mod-php7.3 php7.3-pdo php7.3-mysql mysql-server mysql-client php7.3-xdebug
 
 mysql -e "CREATE DATABASE IF NOT EXISTS doctrine CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 mysql -e "CREATE USER If NOT EXISTS 'doctrine'@'%' IDENTIFIED BY '123';"

@@ -7,3 +7,4 @@ data/cache/*
 phpunit.xml
 *.phar
 CustomRepositoryAwareTrait.php
+*DataFactory.php

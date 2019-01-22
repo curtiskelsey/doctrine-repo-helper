@@ -11,7 +11,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Zend\Code\Generator\DocBlockGenerator;
 use Zend\Code\Generator\FileGenerator;
-use Zend\Code\Generator\ValueGenerator;
 
 /**
  * Class GenerateDataFactoryCommand
@@ -152,7 +151,11 @@ class GenerateDataFactoryCommand extends Command
                     );
                     break;
                 case 'guid':
-                    // TODO
+                    $data[] = sprintf(
+                        "        '%s' => uniqid('', true)",
+                        $fieldMapping['fieldName']
+                    );
+                    break;
                 case 'binary':
                 case 'blob':
                     break;

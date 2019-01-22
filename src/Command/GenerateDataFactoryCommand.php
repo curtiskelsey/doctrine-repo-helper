@@ -37,8 +37,8 @@ class GenerateDataFactoryCommand extends Command
 
         $this
             ->setName('orm:generate-data-factories')
-            ->setDescription('')
-            ->setHelp('')
+            ->setDescription('Generate data factories for use with Codeception')
+            ->setHelp('Generates data factories for use with the Codeception DataFactory module')
             ->addOption(
                 'output',
                 'o',
@@ -73,6 +73,13 @@ class GenerateDataFactoryCommand extends Command
         foreach ($metaDataEntries as $metaData) {
             if ($filter = $input->getOption('filter')) {
                 if (strpos($metaData->getName(), $filter) === false) {
+                    $output->writeln(
+                        sprintf(
+                            'Filtering out %s...',
+                            $metaData->getName()
+                        ),
+                        OutputInterface::VERBOSITY_VERY_VERBOSE
+                    );
                     continue;
                 }
             }
@@ -101,6 +108,18 @@ class GenerateDataFactoryCommand extends Command
                     'body' => $this->buildBody($metaData),
                 ]
             );
+
+            if (file_exists($fileName)) {
+                $output->writeln(
+                    sprintf(
+                        '%s already exists. Skipping...',
+                        $fileName
+                    ),
+                    OutputInterface::VERBOSITY_VERBOSE
+                );
+
+                continue;
+            }
 
             file_put_contents($fileName, $file->generate());
         }

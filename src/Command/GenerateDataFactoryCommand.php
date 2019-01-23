@@ -216,14 +216,19 @@ class GenerateDataFactoryCommand extends Command
         foreach ($metaData->associationMappings as $associationMapping) {
             switch ($associationMapping['type']) {
                 case 1:
+                case 2:
+                case 3:
                     $data[] = sprintf(
-                        "        '%s' => 'entity|' . \\%s::class",
+                        "        '%s' => 'entity|' . \\%s::class,\n",
                         $associationMapping['fieldName'],
                         $associationMapping['targetEntity']
                     );
                     break;
-                case 2:
-                    // TODO many to one?
+                case 4:
+                    // TODO one to many
+                    break;
+                case 8:
+                    // TODO many to many
                     break;
                 default:
                     break;

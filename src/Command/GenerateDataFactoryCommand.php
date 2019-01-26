@@ -3,8 +3,8 @@
 namespace DoctrineRepoHelper\Command;
 
 
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -181,7 +181,7 @@ class GenerateDataFactoryCommand extends Command
     private function buildAssociationMappings(ClassMetadata $metaData): array
     {
         $data = array_map(
-            function(array $associationMapping) {
+            function (array $associationMapping) {
                 if ($associationMapping['type'] > 0 && $associationMapping['type'] < 4) {
                     return sprintf(
                         "        '%s' => 'entity|' . \\%s::class,\n",
@@ -206,76 +206,47 @@ class GenerateDataFactoryCommand extends Command
     {
         $data = [];
 
+        $lookupTable = [
+            'smallint' => 'random_int(0, 65000)',
+            'integer' => 'random_int(0, 65000)',
+            'bigint' => 'random_int(0, 65000)',
+            'decimal' => 'Faker::randomFloat(2)',
+            'float' => 'Faker::randomFloat(2)',
+            'string' => 'Faker::sentence()',
+            'text' => 'Faker::paragraph()',
+            'guid' => "uniqid('', true)",
+            'binary' => null,
+            'blob' => null,
+            'boolean' => '(bool)random_int(0, 1)',
+            'date' => 'Faker::dateTime()',
+            'date_immutable' => 'Faker::dateTime()',
+            'datetime' => 'Faker::dateTime()',
+            'datetime_immutable' => 'Faker::dateTime()',
+            'datetimetz' => 'Faker::dateTime()',
+            'datetimetz_immutable' => 'Faker::dateTime()',
+            'time' => 'Faker::dateTime()',
+            'time_immutable' => 'Faker::dateTime()',
+            'dateinterval' => null,
+            'array' => null,
+            'simple_array' => null,
+            'json' => null,
+            'json_array' => null,
+            'object' => null,
+        ];
+
         foreach ($metaData->fieldMappings as $fieldMapping) {
-            switch ($fieldMapping['type']) {
-                case 'smallint':
-                case 'integer':
-                case 'bigint':
-                    $data[] = sprintf(
-                        "        '%s' => random_int(0, 65000),\n",
-                        $fieldMapping['fieldName']
-                    );
-                    break;
-                case 'decimal':
-                case 'float':
-                    $data[] = sprintf(
-                        "        '%s' => Faker::randomFloat(2),\n",
-                        $fieldMapping['fieldName']
-                    );
-                    break;
-                case 'string':
-                    $data[] = sprintf(
-                        "        '%s' => Faker::sentence(),\n",
-                        $fieldMapping['fieldName']
-                    );
-                    break;
-                case 'text':
-                    $data[] = sprintf(
-                        "        '%s' => Faker::paragraph(),\n",
-                        $fieldMapping['fieldName']
-                    );
-                    break;
-                case 'guid':
-                    $data[] = sprintf(
-                        "        '%s' => uniqid('', true)",
-                        $fieldMapping['fieldName']
-                    );
-                    break;
-                case 'binary':
-                case 'blob':
-                    break;
-                case 'boolean':
-                    $data[] = sprintf(
-                        "        '%s' => (bool)random_int(0, 1),\n",
-                        $fieldMapping['fieldName']
-                    );
-                    break;
-                case 'date':
-                case 'date_immutable':
-                case 'datetime':
-                case 'datetime_immutable':
-                case 'datetimetz':
-                case 'datetimetz_immutable':
-                case 'time':
-                case 'time_immutable':
-                    $data[] = sprintf(
-                        "        '%s' => Faker::dateTime(),\n",
-                        $fieldMapping['fieldName']
-                    );
-                    break;
-                case 'dateinterval':
-                case 'array':
-                case 'simple_array':
-                case 'json':
-                case 'json_array':
-                case 'object':
-                    break;
-                default:
-                    $data[] = sprintf(
-                        "        '%s' => Faker::word(),\n",
-                        $fieldMapping['fieldName']
-                    );
-                    break;
+            if (!array_key_exists($fieldMapping['type'], $lookupTable)) {
+                continue;
+            }
+
+            $value = $lookupTable[$fieldMapping['type']];
+
+            if ($value) {
+                $data[] = sprintf(
+                    "        '%s' => %s,\n",
+                    $fieldMapping['fieldName'],
+                    $value
+                );
             }
         }
 

@@ -180,30 +180,22 @@ class GenerateDataFactoryCommand extends Command
      */
     private function buildAssociationMappings(ClassMetadata $metaData): array
     {
-        $data = [];
-
-        foreach ($metaData->associationMappings as $associationMapping) {
-            switch ($associationMapping['type']) {
-                case 1:
-                case 2:
-                case 3:
-                    $data[] = sprintf(
+        $data = array_map(
+            function(array $associationMapping) {
+                if ($associationMapping['type'] > 0 && $associationMapping['type'] < 4) {
+                    return sprintf(
                         "        '%s' => 'entity|' . \\%s::class,\n",
                         $associationMapping['fieldName'],
                         $associationMapping['targetEntity']
                     );
-                    break;
-                case 4:
-                    // TODO one to many
-                    break;
-                case 8:
-                    // TODO many to many
-                    break;
-                default:
-                    break;
-            }
-        }
-        return $data;
+                }
+
+                return null;
+            },
+            $metaData->associationMappings
+        );
+
+        return array_filter($data);
     }
 
     /**

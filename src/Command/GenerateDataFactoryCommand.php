@@ -138,6 +138,80 @@ class GenerateDataFactoryCommand extends Command
      */
     private function buildFactoryData(ClassMetadata $metaData): array
     {
+        $fieldMappings = $this->buildFieldMappings($metaData);
+        $associationMappings = $this->buildAssociationMappings($metaData);
+
+        return array_merge(
+            $fieldMappings,
+            $associationMappings
+        );
+    }
+
+    /**
+     * @param ClassMetadata $metaData
+     * @return string
+     */
+    private function buildBody(ClassMetadata $metaData): string
+    {
+        $fields = $this->buildFactoryData($metaData);
+
+        $body = sprintf(
+            "use League\\FactoryMuffin\\Faker\\Facade as Faker;
+
+\$factory->_define(
+    %s::class,
+    [\n",
+            $metaData->getName()
+        );
+
+        foreach ($fields as $field) {
+            $body .= $field;
+        }
+
+        $body .= '
+    ]
+);';
+        return $body;
+    }
+
+    /**
+     * @param ClassMetadata $metaData
+     * @return array
+     */
+    private function buildAssociationMappings(ClassMetadata $metaData): array
+    {
+        $data = [];
+
+        foreach ($metaData->associationMappings as $associationMapping) {
+            switch ($associationMapping['type']) {
+                case 1:
+                case 2:
+                case 3:
+                    $data[] = sprintf(
+                        "        '%s' => 'entity|' . \\%s::class,\n",
+                        $associationMapping['fieldName'],
+                        $associationMapping['targetEntity']
+                    );
+                    break;
+                case 4:
+                    // TODO one to many
+                    break;
+                case 8:
+                    // TODO many to many
+                    break;
+                default:
+                    break;
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * @param ClassMetadata $metaData
+     * @return array
+     */
+    private function buildFieldMappings(ClassMetadata $metaData): array
+    {
         $data = [];
 
         foreach ($metaData->fieldMappings as $fieldMapping) {
@@ -213,55 +287,6 @@ class GenerateDataFactoryCommand extends Command
             }
         }
 
-        foreach ($metaData->associationMappings as $associationMapping) {
-            switch ($associationMapping['type']) {
-                case 1:
-                case 2:
-                case 3:
-                    $data[] = sprintf(
-                        "        '%s' => 'entity|' . \\%s::class,\n",
-                        $associationMapping['fieldName'],
-                        $associationMapping['targetEntity']
-                    );
-                    break;
-                case 4:
-                    // TODO one to many
-                    break;
-                case 8:
-                    // TODO many to many
-                    break;
-                default:
-                    break;
-            }
-        }
-
         return $data;
-    }
-
-    /**
-     * @param ClassMetadata $metaData
-     * @return string
-     */
-    private function buildBody(ClassMetadata $metaData): string
-    {
-        $fields = $this->buildFactoryData($metaData);
-
-        $body = sprintf(
-            "use League\\FactoryMuffin\\Faker\\Facade as Faker;
-
-\$factory->_define(
-    %s::class,
-    [\n",
-            $metaData->getName()
-        );
-
-        foreach ($fields as $field) {
-            $body .= $field;
-        }
-
-        $body .= '
-    ]
-);';
-        return $body;
     }
 }

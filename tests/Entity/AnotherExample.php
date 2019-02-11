@@ -51,7 +51,7 @@ class AnotherExample
 
     /**
      * @var
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="date", nullable=true)
      */
     private $date;
 
@@ -69,7 +69,7 @@ class AnotherExample
 
     /**
      * @var
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
     private $text;
 
